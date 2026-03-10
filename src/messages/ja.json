@@ -1,0 +1,66 @@
+{
+  "common": {
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "edit": "編集",
+    "create": "作成",
+    "back": "戻る",
+    "loading": "読み込み中…",
+    "error": "エラー",
+    "noData": "データなし"
+  },
+  "nav": {
+    "sessions": "セッション",
+    "agents": "エージェント",
+    "settings": "設定",
+    "logout": "ログアウト"
+  },
+  "agent": {
+    "title": "エージェント",
+    "listTitle": "エージェント一覧",
+    "newAgent": "新規エージェント",
+    "name": "名前",
+    "slug": "スラッグ",
+    "kind": "種別",
+    "kindAssistant": "アシスタント",
+    "kindTool": "ツール",
+    "kindCustom": "カスタム",
+    "config": "設定",
+    "systemPrompt": "システムプロンプト",
+    "model": "モデル",
+    "temperature": "温度",
+    "maxTokens": "最大トークン数",
+    "tools": "ツール一覧",
+    "createdAt": "作成日時",
+    "updatedAt": "更新日時",
+    "deleteConfirm": "このエージェントを削除しますか？",
+    "createSuccess": "エージェントを作成しました。",
+    "updateSuccess": "エージェントを更新しました。",
+    "deleteSuccess": "エージェントを削除しました。",
+    "slugPlaceholder": "英小文字・数字・-・_（空白で自動生成）",
+    "noAgents": "エージェントがありません。",
+    "forbidden": "この操作の権限がありません。",
+    "notFound": "エージェントが見つかりません。"
+  },
+  "auth": {
+    "login": "ログイン",
+    "signOut": "ログアウト",
+    "loginTitle": "OpenClaw にログイン",
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "loggingIn": "ログイン中…",
+    "loginError": "メールアドレスまたはパスワードが正しくありません。"
+  },
+  "session": {
+    "title": "セッション",
+    "count": "{count}件",
+    "id": "セッションID",
+    "agent": "エージェント",
+    "status": "ステータス",
+    "createdAt": "開始日時",
+    "empty": "アクティブなセッションはありません。",
+    "gatewayNotConfigured": "Gateway が設定されていません。OPENCLAW_GATEWAY_URL を設定してください。",
+    "unauthenticated": "セッションを表示するにはログインが必要です。"
+  }
+}

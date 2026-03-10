@@ -1,0 +1,66 @@
+{
+  "common": {
+    "save": "저장",
+    "cancel": "취소",
+    "delete": "삭제",
+    "edit": "편집",
+    "create": "만들기",
+    "back": "뒤로",
+    "loading": "로딩 중…",
+    "error": "오류",
+    "noData": "데이터 없음"
+  },
+  "nav": {
+    "sessions": "세션",
+    "agents": "에이전트",
+    "settings": "설정",
+    "logout": "로그아웃"
+  },
+  "agent": {
+    "title": "에이전트",
+    "listTitle": "에이전트 목록",
+    "newAgent": "새 에이전트",
+    "name": "이름",
+    "slug": "슬러그",
+    "kind": "종류",
+    "kindAssistant": "어시스턴트",
+    "kindTool": "도구",
+    "kindCustom": "커스텀",
+    "config": "설정",
+    "systemPrompt": "시스템 프롬프트",
+    "model": "모델",
+    "temperature": "온도",
+    "maxTokens": "최대 토큰",
+    "tools": "도구 목록",
+    "createdAt": "생성일",
+    "updatedAt": "수정일",
+    "deleteConfirm": "이 에이전트를 삭제할까요?",
+    "createSuccess": "에이전트가 생성되었습니다.",
+    "updateSuccess": "에이전트가 수정되었습니다.",
+    "deleteSuccess": "에이전트가 삭제되었습니다.",
+    "slugPlaceholder": "영소문자, 숫자, -, _ (비우면 자동 생성)",
+    "noAgents": "등록된 에이전트가 없습니다.",
+    "forbidden": "이 작업에 대한 권한이 없습니다.",
+    "notFound": "에이전트를 찾을 수 없습니다."
+  },
+  "auth": {
+    "login": "로그인",
+    "signOut": "로그아웃",
+    "loginTitle": "OpenClaw 로그인",
+    "email": "이메일",
+    "password": "비밀번호",
+    "loggingIn": "로그인 중…",
+    "loginError": "이메일 또는 비밀번호가 올바르지 않습니다."
+  },
+  "session": {
+    "title": "세션",
+    "count": "{count}개",
+    "id": "세션 ID",
+    "agent": "에이전트",
+    "status": "상태",
+    "createdAt": "시작 시각",
+    "empty": "활성 세션이 없습니다.",
+    "gatewayNotConfigured": "Gateway가 설정되지 않아 세션을 불러올 수 없습니다. OPENCLAW_GATEWAY_URL을 설정하세요.",
+    "unauthenticated": "로그인이 필요합니다."
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "back": "Back",
+    "loading": "Loading…",
+    "error": "Error",
+    "noData": "No data"
+  },
+  "nav": {
+    "sessions": "Sessions",
+    "agents": "Agents",
+    "settings": "Settings",
+    "logout": "Log out"
+  },
+  "agent": {
+    "title": "Agents",
+    "listTitle": "Agent list",
+    "newAgent": "New agent",
+    "name": "Name",
+    "slug": "Slug",
+    "kind": "Kind",
+    "kindAssistant": "Assistant",
+    "kindTool": "Tool",
+    "kindCustom": "Custom",
+    "config": "Config",
+    "systemPrompt": "System prompt",
+    "model": "Model",
+    "temperature": "Temperature",
+    "maxTokens": "Max tokens",
+    "tools": "Tools",
+    "createdAt": "Created",
+    "updatedAt": "Updated",
+    "deleteConfirm": "Delete this agent?",
+    "createSuccess": "Agent created.",
+    "updateSuccess": "Agent updated.",
+    "deleteSuccess": "Agent deleted.",
+    "slugPlaceholder": "Lowercase, numbers, -, _ (leave empty to auto-generate)",
+    "noAgents": "No agents yet.",
+    "forbidden": "You don't have permission for this action.",
+    "notFound": "Agent not found."
+  },
+  "auth": {
+    "login": "Log in",
+    "signOut": "Sign out",
+    "loginTitle": "Sign in to OpenClaw",
+    "email": "Email",
+    "password": "Password",
+    "loggingIn": "Signing in…",
+    "loginError": "Invalid email or password."
+  },
+  "session": {
+    "title": "Sessions",
+    "count": "{count} sessions",
+    "id": "Session ID",
+    "agent": "Agent",
+    "status": "Status",
+    "createdAt": "Started",
+    "empty": "No active sessions.",
+    "gatewayNotConfigured": "Gateway is not configured. Set OPENCLAW_GATEWAY_URL to enable sessions.",
+    "unauthenticated": "Please log in to view sessions."
+  }
+}

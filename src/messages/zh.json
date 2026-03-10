@@ -1,0 +1,66 @@
+{
+  "common": {
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "edit": "编辑",
+    "create": "创建",
+    "back": "返回",
+    "loading": "加载中…",
+    "error": "错误",
+    "noData": "无数据"
+  },
+  "nav": {
+    "sessions": "会话",
+    "agents": "智能体",
+    "settings": "设置",
+    "logout": "登出"
+  },
+  "agent": {
+    "title": "智能体",
+    "listTitle": "智能体列表",
+    "newAgent": "新建智能体",
+    "name": "名称",
+    "slug": "标识符",
+    "kind": "类型",
+    "kindAssistant": "助手",
+    "kindTool": "工具",
+    "kindCustom": "自定义",
+    "config": "配置",
+    "systemPrompt": "系统提示词",
+    "model": "模型",
+    "temperature": "温度",
+    "maxTokens": "最大 Token 数",
+    "tools": "工具列表",
+    "createdAt": "创建时间",
+    "updatedAt": "更新时间",
+    "deleteConfirm": "确定要删除此智能体吗？",
+    "createSuccess": "智能体已创建。",
+    "updateSuccess": "智能体已更新。",
+    "deleteSuccess": "智能体已删除。",
+    "slugPlaceholder": "小写字母、数字、-、_（留空自动生成）",
+    "noAgents": "暂无智能体。",
+    "forbidden": "您没有执行此操作的权限。",
+    "notFound": "找不到该智能体。"
+  },
+  "auth": {
+    "login": "登录",
+    "signOut": "退出登录",
+    "loginTitle": "登录 OpenClaw",
+    "email": "邮箱",
+    "password": "密码",
+    "loggingIn": "登录中…",
+    "loginError": "邮箱或密码不正确。"
+  },
+  "session": {
+    "title": "会话",
+    "count": "{count} 个",
+    "id": "会话 ID",
+    "agent": "智能体",
+    "status": "状态",
+    "createdAt": "开始时间",
+    "empty": "暂无活跃会话。",
+    "gatewayNotConfigured": "Gateway 未配置，请设置 OPENCLAW_GATEWAY_URL。",
+    "unauthenticated": "请登录以查看会话。"
+  }
+}
