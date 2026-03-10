@@ -1,10 +1,19 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import {
+  isEnvAuthEnabled,
+  validateEnvCredentials,
+  createSessionToken,
+  SESSION_COOKIE,
+} from "@/lib/auth/env-auth";
 
 /**
  * POST /api/auth/sign-in
  * body: { email: string; password: string }
- * → Supabase email/password 로그인, 쿠키 세션 설정
+ *
+ * 우선순위:
+ *  1. Supabase 설정 시 → Supabase 이메일/비밀번호 인증
+ *  2. AUTH_USERS / AUTH_EMAIL+TOKEN env 설정 시 → env 토큰 매칭
  */
 export async function POST(request: Request) {
   let body: unknown;
@@ -14,32 +23,67 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid_json" }, { status: 400 });
   }
 
-  const { email, password } = body as { email?: string; password?: string };
+  const { email, password } = body as {
+    email?: string;
+    password?: string;
+  };
+
   if (!email || !password) {
     return NextResponse.json(
-      { error: "email과 password는 필수입니다." },
+      { error: "email과 password(token)은 필수입니다." },
       { status: 400 }
     );
   }
 
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+  // ── 1. Supabase 인증 ──────────────────────────────────────────────
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 401 });
+  if (supabaseUrl && supabaseKey) {
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 401 });
+      }
+      return NextResponse.json({
+        user: { id: data.user.id, email: data.user.email },
+      });
+    } catch {
+      // Supabase 설정 오류 시 아래로 폴백
+    }
+  }
+
+  // ── 2. env 토큰 인증 ─────────────────────────────────────────────
+  if (isEnvAuthEnabled()) {
+    const user = validateEnvCredentials(email, password);
+    if (!user) {
+      return NextResponse.json(
+        { error: "이메일 또는 토큰이 올바르지 않습니다." },
+        { status: 401 }
+      );
     }
 
-    return NextResponse.json({
-      user: { id: data.user.id, email: data.user.email },
+    const sessionToken = createSessionToken(user);
+    const res = NextResponse.json({
+      user: { email: user.email, role: user.role },
     });
-  } catch {
-    return NextResponse.json(
-      { error: "Supabase가 설정되지 않았습니다." },
-      { status: 503 }
-    );
+    res.cookies.set(SESSION_COOKIE, sessionToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60,
+      path: "/",
+    });
+    return res;
   }
+
+  // ── 3. 인증 수단 없음 (개발용: 통과) ────────────────────────────
+  return NextResponse.json(
+    { error: "인증 수단이 설정되지 않았습니다. AUTH_USERS 또는 Supabase를 설정하세요." },
+    { status: 503 }
+  );
 }
