@@ -74,5 +74,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)"],
+  // api, _next, _vercel, 파일 확장자 제외 → next-intl이 API 라우트를 잡지 않도록
+  matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"],
 };
