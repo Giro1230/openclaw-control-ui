@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import {
   isEnvAuthEnabled,
@@ -6,6 +6,7 @@ import {
   createSessionToken,
   SESSION_COOKIE,
 } from "@/lib/auth/env-auth";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 /**
  * POST /api/auth/sign-in
@@ -15,7 +16,23 @@ import {
  *  1. Supabase 설정 시 → Supabase 이메일/비밀번호 인증
  *  2. AUTH_USERS / AUTH_EMAIL+TOKEN env 설정 시 → env 토큰 매칭
  */
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  // IP당 10분에 10회 제한
+  const ip = getClientIp(request.headers);
+  const rl = checkRateLimit(`sign-in:${ip}`, 10, 10 * 60 * 1000);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: "too_many_requests", message: "잠시 후 다시 시도해주세요." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)),
+          "X-RateLimit-Remaining": "0",
+        },
+      }
+    );
+  }
+
   let body: unknown;
   try {
     body = await request.json();
@@ -81,9 +98,11 @@ export async function POST(request: Request) {
     return res;
   }
 
-  // ── 3. 인증 수단 없음 (개발용: 통과) ────────────────────────────
+  // ── 3. 인증 수단 없음 ────────────────────────────────────────────
   return NextResponse.json(
-    { error: "인증 수단이 설정되지 않았습니다. AUTH_USERS 또는 Supabase를 설정하세요." },
+    {
+      error: "인증 수단이 설정되지 않았습니다. AUTH_USERS 또는 Supabase를 설정하세요.",
+    },
     { status: 503 }
   );
 }

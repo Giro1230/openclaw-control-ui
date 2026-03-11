@@ -1,13 +1,20 @@
 import fs from "fs";
 import path from "path";
+import { randomUUID } from "crypto";
 import type { Agent, AgentCreateInput, AgentUpdateInput } from "@/types/agent";
 
 /**
- * 에이전트 JSON 파일 저장소 (AGENT_STORE_PATH 설정 시 사용, 네이티브 빌드 없음)
+ * 에이전트 JSON 파일 저장소 (AGENT_STORE_PATH 설정 시 사용)
+ *
+ * 동시성 안전성:
+ * - atomic write: 임시 파일에 먼저 쓴 후 rename으로 원자적 교체
+ * - 단일 Node.js 프로세스 내 동시성: rename은 단일 프로세스 내에서 순차적으로 처리됨
+ * - 멀티 프로세스/Pod 환경: 파일락(proper-lockfile 등) 또는 DB 마이그레이션 필요
+ *   → MIGRATION.md의 파일→DB 전환 가이드 참조
  */
 
 function generateId(): string {
-  return `agt_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 9)}`;
+  return `agt_${Date.now().toString(36)}_${randomUUID().slice(0, 8)}`;
 }
 
 function slugFromName(name: string): string {
@@ -25,13 +32,17 @@ function getPath(): string {
   return path.join(process.cwd(), "data", "agents.json");
 }
 
+function ensureDir(filePath: string): void {
+  const dir = path.dirname(filePath);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+}
+
 function loadAll(): Agent[] {
   const filePath = getPath();
   try {
-    const dir = path.dirname(filePath);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
+    ensureDir(filePath);
     if (!fs.existsSync(filePath)) {
       return [];
     }
@@ -43,19 +54,39 @@ function loadAll(): Agent[] {
   }
 }
 
+/**
+ * 원자적 파일 쓰기: 임시 파일에 먼저 작성 후 rename으로 교체
+ * 쓰기 도중 프로세스가 죽어도 기존 파일 손상 없음
+ */
 function saveAll(agents: Agent[]): void {
   const filePath = getPath();
-  const dir = path.dirname(filePath);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+  ensureDir(filePath);
+
+  const tmpPath = `${filePath}.tmp.${process.pid}.${Date.now()}`;
+  try {
+    fs.writeFileSync(tmpPath, JSON.stringify(agents, null, 2), {
+      encoding: "utf-8",
+      flag: "w",
+    });
+    // atomic rename: 같은 파일시스템 내에서 원자적 교체
+    fs.renameSync(tmpPath, filePath);
+  } catch (err) {
+    // 임시 파일 정리
+    try {
+      fs.unlinkSync(tmpPath);
+    } catch {
+      // 무시
+    }
+    throw err;
   }
-  fs.writeFileSync(filePath, JSON.stringify(agents, null, 2), "utf-8");
 }
 
 export function listAgents(ownerId?: string): Agent[] {
   const list = loadAll();
   const filtered = ownerId ? list.filter((a) => a.owner_id === ownerId) : list;
-  return filtered.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+  return filtered.sort(
+    (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+  );
 }
 
 export function getAgentById(id: string): Agent | undefined {
@@ -63,13 +94,16 @@ export function getAgentById(id: string): Agent | undefined {
 }
 
 export function getAgentBySlug(slug: string, ownerId?: string): Agent | undefined {
-  return loadAll().find((a) => a.slug === slug && (ownerId == null || a.owner_id === ownerId));
+  return loadAll().find(
+    (a) => a.slug === slug && (ownerId == null || a.owner_id === ownerId)
+  );
 }
 
 export function createAgent(input: AgentCreateInput, ownerId: string): Agent {
   const all = loadAll();
   const now = new Date().toISOString();
-  const slug = input.slug?.trim() || slugFromName(input.name) || generateId().slice(0, 12);
+  const slug =
+    input.slug?.trim() || slugFromName(input.name) || generateId().slice(0, 12);
   if (all.some((a) => a.slug === slug && a.owner_id === ownerId)) {
     throw new Error("SLUG_EXISTS");
   }
@@ -88,13 +122,21 @@ export function createAgent(input: AgentCreateInput, ownerId: string): Agent {
   return agent;
 }
 
-export function updateAgent(id: string, input: AgentUpdateInput, ownerId: string): Agent | null {
+export function updateAgent(
+  id: string,
+  input: AgentUpdateInput,
+  ownerId: string
+): Agent | null {
   const all = loadAll();
   const idx = all.findIndex((a) => a.id === id && a.owner_id === ownerId);
   if (idx === -1) return null;
   const existing = all[idx];
-  const slug = input.slug !== undefined ? input.slug.trim() : existing.slug;
-  if (slug !== existing.slug && all.some((a) => a.owner_id === ownerId && a.slug === slug)) {
+  const slug =
+    input.slug !== undefined ? input.slug.trim() : existing.slug;
+  if (
+    slug !== existing.slug &&
+    all.some((a) => a.owner_id === ownerId && a.slug === slug)
+  ) {
     throw new Error("SLUG_EXISTS");
   }
   const updated: Agent = {

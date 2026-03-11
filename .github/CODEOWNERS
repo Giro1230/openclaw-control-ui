@@ -1,0 +1,10 @@
+# CODEOWNERS - PR 머지 전 리뷰 필수 지정자
+
+# 전체 코드베이스 기본 소유자
+* @your-github-username
+
+# 보안 민감 파일 - 추가 리뷰 필수
+src/lib/auth/**         @your-github-username
+src/middleware.ts       @your-github-username
+.github/workflows/**    @your-github-username
+SECURITY.md             @your-github-username
