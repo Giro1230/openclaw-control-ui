@@ -1,10 +1,10 @@
-# CODEOWNERS - PR 머지 전 리뷰 필수 지정자
+# CODEOWNERS - Required reviewers before PR merge
 
-# 전체 코드베이스 기본 소유자
-* @your-github-username
+# Default owner for all files
+* @hellowin1230
 
-# 보안 민감 파일 - 추가 리뷰 필수
-src/lib/auth/**         @your-github-username
-src/middleware.ts       @your-github-username
-.github/workflows/**    @your-github-username
-SECURITY.md             @your-github-username
+# Security-sensitive files - mandatory review
+src/lib/auth/**         @hellowin1230
+src/middleware.ts       @hellowin1230
+.github/workflows/**    @hellowin1230
+SECURITY.md             @hellowin1230
