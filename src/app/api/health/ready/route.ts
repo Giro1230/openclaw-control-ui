@@ -13,6 +13,11 @@ interface HealthCheck {
  * GET /api/health/ready
  * Readiness probe: checks whether dependent services (Gateway, Supabase) are reachable.
  * No authentication required (used by load balancers and orchestrators).
+ *
+ * HTTP status codes:
+ *  200 — all checks ok
+ *  207 — degraded (some checks failed but service can still serve traffic)
+ *  503 — error (service should not receive traffic)
  */
 export async function GET() {
   const checks: HealthCheck[] = [];
@@ -29,13 +34,14 @@ export async function GET() {
         signal: ctrl.signal,
         headers: { Authorization: `Bearer ${process.env.OPENCLAW_GATEWAY_TOKEN ?? ""}` },
       }).finally(() => clearTimeout(timeout));
+      const checkStatus: HealthStatus = res.ok ? "ok" : "degraded";
       checks.push({
         name: "gateway",
-        status: res.ok ? "ok" : "degraded",
+        status: checkStatus,
         latencyMs: Date.now() - start,
         detail: res.ok ? undefined : `HTTP ${res.status}`,
       });
-      if (!res.ok) overallStatus = "degraded";
+      if (checkStatus === "degraded" && overallStatus === "ok") overallStatus = "degraded";
     } catch {
       checks.push({
         name: "gateway",
@@ -43,7 +49,7 @@ export async function GET() {
         latencyMs: Date.now() - start,
         detail: "unreachable",
       });
-      overallStatus = "degraded";
+      if (overallStatus === "ok") overallStatus = "degraded";
     }
   } else {
     checks.push({ name: "gateway", status: "ok", detail: "not configured (optional)" });
@@ -60,11 +66,13 @@ export async function GET() {
         signal: ctrl.signal,
         headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "" },
       }).finally(() => clearTimeout(timeout));
+      const checkStatus: HealthStatus = res.ok || res.status === 400 ? "ok" : "degraded";
       checks.push({
         name: "supabase",
-        status: res.ok || res.status === 400 ? "ok" : "degraded",
+        status: checkStatus,
         latencyMs: Date.now() - start,
       });
+      if (checkStatus === "degraded" && overallStatus === "ok") overallStatus = "degraded";
     } catch {
       checks.push({
         name: "supabase",
@@ -72,13 +80,15 @@ export async function GET() {
         latencyMs: Date.now() - start,
         detail: "unreachable",
       });
-      overallStatus = "degraded";
+      if (overallStatus === "ok") overallStatus = "degraded";
     }
   } else {
     checks.push({ name: "supabase", status: "ok", detail: "not configured (using env-auth)" });
   }
 
-  const httpStatus = (overallStatus as string) === "error" ? 503 : 200;
+  // 200 = ok, 207 = degraded (partial), 503 = error (critical failure)
+  const httpStatus =
+    (overallStatus as string) === "error" ? 503 : overallStatus === "degraded" ? 207 : 200;
 
   return NextResponse.json(
     {

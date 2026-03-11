@@ -1,0 +1,9 @@
+#!/bin/sh
+# Run gitleaks to detect secrets before committing.
+# Requires gitleaks to be installed: https://github.com/gitleaks/gitleaks
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks protect --staged --redact --verbose
+else
+  echo "[warn] gitleaks not found — skipping secret scan."
+  echo "       Install: brew install gitleaks"
+fi
