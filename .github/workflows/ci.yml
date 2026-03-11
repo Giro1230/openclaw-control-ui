@@ -57,8 +57,9 @@ jobs:
     name: Security Scan
     runs-on: ubuntu-latest
     permissions:
-      security-events: write
+      actions: read
       contents: read
+      security-events: write
     steps:
       - uses: actions/checkout@v4
 
