@@ -8,9 +8,7 @@ function StatusBadge({ online }: StatusBadgeProps) {
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${
-        online
-          ? "bg-success/15 text-success"
-          : "bg-error/15 text-error"
+        online ? "bg-success/15 text-success" : "bg-error/15 text-error"
       }`}
     >
       <span
@@ -23,12 +21,20 @@ function StatusBadge({ online }: StatusBadgeProps) {
   );
 }
 
-interface AssistantStatusProps {
+function formatUptime(uptime: number): string {
+  if (uptime < 60) return `${uptime}s`;
+  if (uptime < 3600) return `${Math.floor(uptime / 60)}m`;
+  return `${Math.floor(uptime / 3600)}h ${Math.floor((uptime % 3600) / 60)}m`;
+}
+
+export interface AssistantStatusProps {
   online: boolean;
   model?: string;
   uptime?: number;
   health: "ok" | "degraded" | "error" | "unknown";
   sessionCount: number;
+  /** ISO timestamp of when the status was last fetched */
+  lastChecked?: string;
 }
 
 export function AssistantStatus({
@@ -37,6 +43,7 @@ export function AssistantStatus({
   uptime,
   health,
   sessionCount,
+  lastChecked,
 }: AssistantStatusProps) {
   const healthColor =
     health === "ok"
@@ -47,14 +54,13 @@ export function AssistantStatus({
           ? "text-error"
           : "text-base-content/40";
 
-  const uptimeDisplay =
-    uptime !== undefined
-      ? uptime < 60
-        ? `${uptime}s`
-        : uptime < 3600
-          ? `${Math.floor(uptime / 60)}m`
-          : `${Math.floor(uptime / 3600)}h ${Math.floor((uptime % 3600) / 60)}m`
-      : "—";
+  const lastCheckedDisplay = lastChecked
+    ? new Date(lastChecked).toLocaleTimeString(undefined, {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      })
+    : null;
 
   return (
     <div className="card bg-base-200 border border-base-300">
@@ -63,23 +69,39 @@ export function AssistantStatus({
           <h2 className="text-sm font-semibold text-base-content/60 uppercase tracking-wider">
             Assistant Status
           </h2>
-          <StatusBadge online={online} />
+          <div className="flex items-center gap-2">
+            {lastCheckedDisplay && (
+              <span
+                className="text-xs text-base-content/30"
+                title="Last checked"
+              >
+                {lastCheckedDisplay}
+              </span>
+            )}
+            <StatusBadge online={online} />
+          </div>
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
           <div>
             <p className="text-xs text-base-content/50">Model</p>
-            <p className="mt-0.5 text-sm font-medium truncate">
+            <p className="mt-0.5 text-sm font-medium truncate" title={model}>
               {model ?? "—"}
             </p>
           </div>
           <div>
             <p className="text-xs text-base-content/50">Uptime</p>
-            <p className="mt-0.5 text-sm font-medium">{uptimeDisplay}</p>
+            <p className="mt-0.5 text-sm font-medium">
+              {uptime !== undefined ? formatUptime(uptime) : "—"}
+            </p>
           </div>
           <div>
             <p className="text-xs text-base-content/50">Health</p>
-            <p className={`mt-0.5 text-sm font-medium capitalize ${healthColor}`}>
+            <p
+              className={`mt-0.5 text-sm font-medium capitalize ${healthColor}`}
+              role="status"
+              aria-label={`Health: ${health}`}
+            >
               {health}
             </p>
           </div>
