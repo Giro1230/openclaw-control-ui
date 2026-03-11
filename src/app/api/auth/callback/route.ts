@@ -3,8 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 
 /**
  * GET /api/auth/callback
- * OAuth / 이메일 확인 후 Supabase가 리다이렉트하는 엔드포인트.
- * code를 session으로 교환하고 홈으로 이동.
+ * Endpoint Supabase redirects to after OAuth or email confirmation.
+ * Exchanges the code for a session, then redirects to the app.
  */
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -16,7 +16,7 @@ export async function GET(request: Request) {
       const supabase = await createClient();
       await supabase.auth.exchangeCodeForSession(code);
     } catch {
-      // 코드 교환 실패 시 로그인 페이지로
+      // Code exchange failed — redirect to login with error flag
       return NextResponse.redirect(new URL("/login?error=callback", request.url));
     }
   }

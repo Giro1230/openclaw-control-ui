@@ -10,19 +10,19 @@ import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 /**
  * POST /api/auth/sign-in
- * body: { email: string; password: string }
+ * Body: { email: string; password: string }
  *
- * 우선순위:
- *  1. Supabase 설정 시 → Supabase 이메일/비밀번호 인증
- *  2. AUTH_USERS / AUTH_EMAIL+TOKEN env 설정 시 → env 토큰 매칭
+ * Priority:
+ *  1. Supabase email/password auth (when NEXT_PUBLIC_SUPABASE_URL is set)
+ *  2. env-auth token matching (AUTH_USERS or AUTH_EMAIL+TOKEN)
  */
 export async function POST(request: NextRequest) {
-  // IP당 10분에 10회 제한
+  // 10 requests per IP per 10 minutes
   const ip = getClientIp(request.headers);
   const rl = checkRateLimit(`sign-in:${ip}`, 10, 10 * 60 * 1000);
   if (!rl.allowed) {
     return NextResponse.json(
-      { error: "too_many_requests", message: "잠시 후 다시 시도해주세요." },
+      { error: "too_many_requests", message: "Too many login attempts. Please try again later." },
       {
         status: 429,
         headers: {
@@ -47,12 +47,12 @@ export async function POST(request: NextRequest) {
 
   if (!email || !password) {
     return NextResponse.json(
-      { error: "email과 password(token)은 필수입니다." },
+      { error: "email and password (token) are required" },
       { status: 400 }
     );
   }
 
-  // ── 1. Supabase 인증 ──────────────────────────────────────────────
+  // ── 1. Supabase auth ──────────────────────────────────────────────
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -70,16 +70,16 @@ export async function POST(request: NextRequest) {
         user: { id: data.user.id, email: data.user.email },
       });
     } catch {
-      // Supabase 설정 오류 시 아래로 폴백
+      // Supabase misconfigured — fall through to env-auth
     }
   }
 
-  // ── 2. env 토큰 인증 ─────────────────────────────────────────────
+  // ── 2. env-auth ───────────────────────────────────────────────────
   if (isEnvAuthEnabled()) {
     const user = validateEnvCredentials(email, password);
     if (!user) {
       return NextResponse.json(
-        { error: "이메일 또는 토큰이 올바르지 않습니다." },
+        { error: "Invalid email or token" },
         { status: 401 }
       );
     }
@@ -98,10 +98,10 @@ export async function POST(request: NextRequest) {
     return res;
   }
 
-  // ── 3. 인증 수단 없음 ────────────────────────────────────────────
+  // ── 3. No auth configured ─────────────────────────────────────────
   return NextResponse.json(
     {
-      error: "인증 수단이 설정되지 않았습니다. AUTH_USERS 또는 Supabase를 설정하세요.",
+      error: "No authentication method configured. Set AUTH_USERS or configure Supabase.",
     },
     { status: 503 }
   );

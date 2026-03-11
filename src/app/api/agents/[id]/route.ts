@@ -6,15 +6,13 @@ import { agentUpdateSchema } from "@/lib/agent/schema";
 
 type Params = { params: Promise<{ id: string }> };
 
-/**
- * GET: 에이전트 단건 조회 (viewer 이상)
- */
+/** GET /api/agents/:id — Fetch a single agent (viewer role or above) */
 export async function GET(_request: Request, { params }: Params) {
   const { id } = await params;
   const role = await getAppRole(_request.headers);
   if (!hasRole(role, AGENT_READ_MIN_ROLE)) {
     return NextResponse.json(
-      { error: "forbidden", message: "역할 권한 부족" },
+      { error: "forbidden", message: "Insufficient role" },
       { status: 403 }
     );
   }
@@ -26,15 +24,13 @@ export async function GET(_request: Request, { params }: Params) {
   return NextResponse.json(agent);
 }
 
-/**
- * PATCH: 에이전트 수정 (operator 이상)
- */
+/** PATCH /api/agents/:id — Update an agent (operator role or above) */
 export async function PATCH(request: Request, { params }: Params) {
   const { id } = await params;
   const role = await getAppRole(request.headers);
   if (!hasRole(role, AGENT_WRITE_MIN_ROLE)) {
     return NextResponse.json(
-      { error: "forbidden", message: "역할 권한 부족" },
+      { error: "forbidden", message: "Insufficient role" },
       { status: 403 }
     );
   }
@@ -67,15 +63,13 @@ export async function PATCH(request: Request, { params }: Params) {
   }
 }
 
-/**
- * DELETE: 에이전트 삭제 (operator 이상)
- */
+/** DELETE /api/agents/:id — Delete an agent (operator role or above) */
 export async function DELETE(_request: Request, { params }: Params) {
   const { id } = await params;
   const role = await getAppRole(_request.headers);
   if (!hasRole(role, AGENT_WRITE_MIN_ROLE)) {
     return NextResponse.json(
-      { error: "forbidden", message: "역할 권한 부족" },
+      { error: "forbidden", message: "Insufficient role" },
       { status: 403 }
     );
   }

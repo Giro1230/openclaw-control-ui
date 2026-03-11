@@ -9,12 +9,12 @@ import type { User } from "@supabase/supabase-js";
 import type { AppRole } from "@/types/rbac";
 
 /**
- * 서버 컴포넌트 / API Route에서 현재 로그인 사용자 반환.
+ * Returns the currently authenticated user for use in Server Components and API Routes.
  *
- * 우선순위:
- *  1. Supabase 세션 (NEXT_PUBLIC_SUPABASE_URL 설정 시)
- *  2. env 세션 쿠키 (__openclaw_session)
- *  3. null (미인증)
+ * Priority:
+ *  1. Supabase session (when NEXT_PUBLIC_SUPABASE_URL is configured)
+ *  2. env session cookie (__openclaw_session)
+ *  3. null (unauthenticated)
  */
 export async function getSessionUser(): Promise<User | null> {
   // 1. Supabase
@@ -25,10 +25,10 @@ export async function getSessionUser(): Promise<User | null> {
     } = await supabase.auth.getUser();
     if (user) return user;
   } catch {
-    // Supabase 미설정
+    // Supabase not configured
   }
 
-  // 2. env 토큰 세션
+  // 2. env-auth session cookie
   if (isEnvAuthEnabled()) {
     try {
       const cookieStore = await cookies();
@@ -47,34 +47,34 @@ export async function getSessionUser(): Promise<User | null> {
         }
       }
     } catch {
-      // 쿠키 읽기 실패
+      // Failed to read cookie
     }
   }
 
   return null;
 }
 
-/** 로그인 필수 컨텍스트 — 미인증 시 에러 throw */
+/** Requires authentication — throws if unauthenticated */
 export async function requireSessionUser(): Promise<User> {
   const user = await getSessionUser();
   if (!user) throw new Error("UNAUTHENTICATED");
   return user;
 }
 
-/** user.app_metadata.role → AppRole */
+/** Extracts AppRole from user.app_metadata.role */
 export function getRoleFromUser(user: User): AppRole {
   const role = (user.app_metadata?.role as string | undefined)?.toLowerCase();
   if (role === "viewer" || role === "operator" || role === "admin") return role;
   return "operator";
 }
 
-/** 현재 사용자 owner_id (= user.id). 없으면 "default-owner". */
+/** Returns the current user's owner_id (= user.id), or "default-owner" if unauthenticated */
 export async function getSessionOwnerId(): Promise<string> {
   const user = await getSessionUser();
   return user?.id ?? "default-owner";
 }
 
-/** 현재 사용자 AppRole. 없으면 operator. */
+/** Returns the current user's AppRole, or "operator" if unauthenticated */
 export async function getSessionRole(): Promise<AppRole> {
   const user = await getSessionUser();
   if (!user) return "operator";

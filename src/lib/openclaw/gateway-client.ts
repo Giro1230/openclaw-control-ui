@@ -1,6 +1,6 @@
 /**
- * OpenClaw Gateway 서버 전용 클라이언트 (WebSocket).
- * 브라우저에서 호출 금지. API 라우트·서버 액션에서만 사용.
+ * Server-only OpenClaw Gateway client (WebSocket).
+ * Must not be called from the browser. Use only in API Routes or Server Actions.
  */
 
 import WebSocket from "ws";
@@ -10,7 +10,7 @@ const DEFAULT_TIMEOUT_MS = 10_000;
 function getGatewayUrl(): string {
   const url = process.env.OPENCLAW_GATEWAY_URL;
   if (!url || !url.startsWith("ws")) {
-    throw new Error("OPENCLAW_GATEWAY_URL가 ws:// 또는 wss:// 로 설정되어야 합니다.");
+    throw new Error("OPENCLAW_GATEWAY_URL must be set to a ws:// or wss:// address");
   }
   const token = process.env.OPENCLAW_GATEWAY_TOKEN;
   if (token) {
@@ -21,7 +21,7 @@ function getGatewayUrl(): string {
 }
 
 /**
- * Gateway에 단일 요청 보내고 응답 payload 반환 (status 등)
+ * Sends a single request to the Gateway and returns the response payload.
  */
 export function requestGateway<T = unknown>(
   method: string,
@@ -85,9 +85,7 @@ export function requestGateway<T = unknown>(
   });
 }
 
-/**
- * Gateway status 요청 (연동 확인용)
- */
+/** Fetches the Gateway status (used for health checks and connectivity verification) */
 export function fetchGatewayStatus(): Promise<Record<string, unknown>> {
   return requestGateway<Record<string, unknown>>("status", {});
 }
@@ -112,8 +110,10 @@ export interface ChatResponse {
 }
 
 /**
- * Gateway에 채팅 메시지 전송.
- * payload: { session_id?, agent_id, message }
+ * Sends a chat message to the Gateway.
+ * @param message - User message text
+ * @param agentId - Target agent ID
+ * @param sessionId - Optional session ID to continue an existing session
  */
 export function sendChat(
   message: string,
@@ -127,9 +127,7 @@ export function sendChat(
   });
 }
 
-/**
- * Gateway 세션 목록 조회.
- */
+/** Retrieves the list of active sessions from the Gateway */
 export function listGatewaySessions(): Promise<GatewaySession[]> {
   return requestGateway<GatewaySession[]>("list_sessions", {});
 }

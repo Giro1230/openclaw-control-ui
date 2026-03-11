@@ -3,7 +3,7 @@
 > A custom control UI for using OpenClaw properly.  
 > Separates Supabase app auth from OpenClaw Gateway tokens, and manages agents, sessions, and chat in one place.
 
-[![Build](https://img.shields.io/badge/build-passing-brightgreen)](#build--test)
+[![CI](https://github.com/your-org/openclawdashboard/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/openclawdashboard/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](tsconfig.json)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
 
@@ -28,16 +28,17 @@
 
 | Check | Result |
 |-------|--------|
-| TypeScript (`tsc --noEmit`) | ✅ No errors |
-| ESLint (`next lint`) | ✅ No warnings or errors |
-| Production build (`next build`) | ✅ 16 pages/routes built successfully |
+| TypeScript (`npm run typecheck`) | ✅ No errors |
+| ESLint (`npm run lint`) | ✅ No warnings or errors |
+| Unit & API tests (`npm run test`) | ✅ 71 tests passing |
+| Production build (`npm run build`) | ✅ All routes built successfully |
 | Docker Compose | ✅ `local` and `server` profiles |
 
 ### Routes
 
 ```
 /                             Home — agent overview
-/login                        Login (Supabase email/password)
+/login                        Login (Supabase or env-auth)
 /agents                       Agent list
 /agents/new                   Create agent
 /agents/[id]                  Agent detail & edit
@@ -45,12 +46,14 @@
 /settings                     Settings
 /api/agents                   Agent CRUD API
 /api/agents/[id]              Agent single-item API
-/api/auth/sign-in             Supabase sign-in
-/api/auth/sign-out            Supabase sign-out
+/api/auth/sign-in             Sign-in (Supabase or env-auth)
+/api/auth/sign-out            Sign-out
 /api/auth/callback            OAuth / email confirmation callback
-/api/openclaw/status          Gateway status relay
-/api/openclaw/sessions        Gateway session list relay
-/api/openclaw/chat            Gateway chat relay
+/api/openclaw/status          Gateway status relay (auth required)
+/api/openclaw/sessions        Gateway session list relay (auth required)
+/api/openclaw/chat            Gateway chat relay (auth required)
+/api/health/live              Liveness probe
+/api/health/ready             Readiness probe (Gateway & Supabase checks)
 ```
 
 ---
@@ -63,7 +66,8 @@
 | Language | TypeScript (strict) |
 | UI | Tailwind CSS + **shadcn/ui** + **DaisyUI** |
 | i18n | next-intl (ko · en · ja · zh, env-configurable timezone) |
-| Auth | Supabase Auth + SSR client |
+| Auth | Supabase Auth **or** env-auth (AUTH_USERS) |
+| Testing | Vitest + Testing Library / Playwright (E2E) |
 | Agent store | JSON file (`AGENT_STORE_PATH`) or in-memory |
 | Gateway | Server-only WebSocket relay (`ws` package) |
 | Validation | Zod |

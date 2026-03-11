@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom";
 import { vi } from "vitest";
 
-// Next.js 서버 전용 모듈 Mock
+// Mock Next.js server-only modules
 vi.mock("next/headers", () => ({
   cookies: vi.fn(() =>
     Promise.resolve({
@@ -18,5 +18,5 @@ vi.mock("next/navigation", () => ({
   notFound: vi.fn(),
 }));
 
-// 환경변수 기본값
+// Default env for tests
 process.env.AUTH_SECRET = "test-secret-for-unit-tests-only-32chars";

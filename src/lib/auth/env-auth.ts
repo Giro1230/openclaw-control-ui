@@ -9,10 +9,10 @@ export interface EnvUser {
 const DEV_SECRET = "openclaw-dev-secret-CHANGE-IN-PRODUCTION";
 
 /**
- * env에서 사용자 목록 파싱.
+ * Parses the user list from environment variables.
  *
- * 다중 사용자: AUTH_USERS=email:token:role,email2:token2:role2
- * 단일 사용자: AUTH_EMAIL + AUTH_TOKEN + AUTH_ROLE (단축 설정)
+ * Multi-user:  AUTH_USERS=email:token:role,email2:token2:role2
+ * Single-user: AUTH_EMAIL + AUTH_TOKEN + AUTH_ROLE (shorthand)
  */
 function getEnvUsers(): Array<{ email: string; token: string; role: AppRole }> {
   const users: Array<{ email: string; token: string; role: AppRole }> = [];
@@ -43,22 +43,22 @@ function getEnvUsers(): Array<{ email: string; token: string; role: AppRole }> {
   return users;
 }
 
-/** AUTH_USERS 또는 AUTH_EMAIL/TOKEN 이 설정된 경우 true */
+/** Returns true when AUTH_USERS or AUTH_EMAIL/TOKEN are configured */
 export function isEnvAuthEnabled(): boolean {
   return getEnvUsers().length > 0;
 }
 
 /**
- * AUTH_SECRET 반환. 프로덕션 환경에서 기본값 사용 시 경고 출력.
- * 기본값이라도 동작은 허용 (개발 편의성 유지).
+ * Returns AUTH_SECRET. Logs a warning in production if the default value is used.
+ * Allows the default in development for convenience.
  */
 function getSecret(): string {
   const secret = process.env.AUTH_SECRET;
   if (!secret || secret === DEV_SECRET) {
     if (process.env.NODE_ENV === "production") {
       console.error(
-        "[SECURITY] AUTH_SECRET이 기본값으로 설정되어 있습니다. " +
-          "프로덕션에서는 반드시 강력한 랜덤 값으로 교체하세요."
+        "[SECURITY] AUTH_SECRET is set to the default value. " +
+          "Replace it with a strong random string before deploying to production."
       );
     }
     return DEV_SECRET;
@@ -67,8 +67,8 @@ function getSecret(): string {
 }
 
 /**
- * 이메일 + 토큰 검증. timing-safe 비교로 타이밍 공격 방지.
- * 일치하면 EnvUser 반환, 아니면 null.
+ * Validates email + token using timing-safe comparison to prevent timing attacks.
+ * Returns the matched EnvUser or null.
  */
 export function validateEnvCredentials(
   email: string,
@@ -93,18 +93,18 @@ export function validateEnvCredentials(
         return { email: u.email, role: u.role };
       }
     } catch {
-      // 길이 불일치 시 timingSafeEqual이 throw하지 않도록 방어
+      // Length mismatch — safe to ignore
     }
   }
   return null;
 }
 
-// --- 세션 서명 (Node.js crypto) ---
+// --- Session signing (Node.js crypto) ---
 
 export const SESSION_COOKIE = "__openclaw_session";
-const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7일
+const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
-/** EnvUser → 서명된 base64 세션 토큰 생성 */
+/** Creates a signed base64 session token from an EnvUser */
 export function createSessionToken(user: EnvUser): string {
   const payload = JSON.stringify({
     email: user.email,
@@ -117,7 +117,7 @@ export function createSessionToken(user: EnvUser): string {
   return Buffer.from(JSON.stringify({ payload, sig })).toString("base64");
 }
 
-/** 서명된 세션 토큰 검증. 유효하면 EnvUser, 아니면 null. */
+/** Verifies a signed session token. Returns the EnvUser if valid, or null. */
 export function verifySessionToken(token: string): EnvUser | null {
   try {
     const raw = Buffer.from(token, "base64").toString("utf-8");
@@ -129,7 +129,7 @@ export function verifySessionToken(token: string): EnvUser | null {
       .update(payload)
       .digest("hex");
 
-    // timing-safe 서명 비교
+    // Timing-safe signature comparison
     const sigBuf = Buffer.from(sig, "hex");
     const expectedBuf = Buffer.from(expected, "hex");
     if (

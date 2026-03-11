@@ -2,8 +2,8 @@ import type { AppRole } from "@/types/rbac";
 import { getSessionUser, getRoleFromUser } from "@/lib/auth/session";
 
 /**
- * API Route에서 현재 요청의 AppRole 반환.
- * Supabase 세션 우선, 없으면 x-app-role 헤더(개발용), 기본 operator.
+ * Returns the AppRole for the current request in an API Route.
+ * Prefers Supabase session; falls back to x-app-role header (dev only); defaults to operator.
  */
 export async function getAppRole(headers: Headers): Promise<AppRole> {
   const user = await getSessionUser();
@@ -15,8 +15,8 @@ export async function getAppRole(headers: Headers): Promise<AppRole> {
 }
 
 /**
- * API Route에서 owner_id 반환.
- * Supabase user.id 우선, 없으면 "default-owner".
+ * Returns the owner_id for the current request.
+ * Uses Supabase user.id when available; falls back to "default-owner".
  */
 export async function getOwnerId(_headers: Headers): Promise<string> {
   const user = await getSessionUser();

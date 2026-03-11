@@ -1,13 +1,39 @@
-# 예제 설정
+# examples/
 
-## env
-- **env.local.example** — 로컬 개발 / Docker 로컬 프로필용. 복사 후 `OPENCLAW_GATEWAY_URL`, Supabase 등만 바꿔서 사용.
-- **env.server.example** — 서버(배포)용. `OPENCLAW_GATEWAY_TOKEN` 등 보안 값 반드시 설정.
+Environment variable example files for the OpenClaw Dashboard.
 
-## Docker
-- 프로젝트 루트의 `docker-compose.yml` 사용.
-- `--profile local`: 대시보드 + OpenClaw Gateway.
-- `--profile server`: 동일 구성, 배포 시 env만 서버용으로.
+| File | Purpose |
+|------|---------|
+| `env.local.example` | Local development (`.env.local`) |
+| `env.server.example` | Server/Docker deployment (`.env`) |
 
-## OpenClaw 연동 확인
-- 대시보드 띄운 뒤 `curl http://localhost:3000/api/openclaw/status` 로 Gateway 연동 여부 확인 (서버에서만 Gateway 호출).
+## Quick start
+
+```bash
+# Local development
+cp examples/env.local.example .env.local
+
+# Server deployment
+cp examples/env.server.example .env
+```
+
+## Verification
+
+After configuring the environment, use these endpoints to confirm the service is running correctly.
+
+```bash
+# Liveness probe (no auth required)
+curl http://localhost:3000/api/health/live
+
+# Readiness probe — checks Gateway and Supabase connectivity
+curl http://localhost:3000/api/health/ready
+
+# Gateway status — authentication required (sign in first)
+curl -b cookie.jar http://localhost:3000/api/openclaw/status
+
+# Agent list — authentication required
+curl -b cookie.jar http://localhost:3000/api/agents
+```
+
+> `GET /api/openclaw/status` requires a valid session cookie.  
+> Unauthenticated requests return `401 Unauthorized`.

@@ -4,8 +4,9 @@ import { randomUUID } from "crypto";
 const isDev = process.env.NODE_ENV === "development";
 
 /**
- * 구조화 JSON 로거 (pino).
- * 개발환경: pretty-print, 프로덕션: JSON 스트림
+ * Structured JSON logger (pino).
+ * Development: pretty-print with colors.
+ * Production: JSON stream for log aggregators.
  */
 export const logger = pino({
   level: process.env.LOG_LEVEL ?? (isDev ? "debug" : "info"),
@@ -37,9 +38,7 @@ export const logger = pino({
 
 export type Logger = typeof logger;
 
-/**
- * 요청 컨텍스트 로거 생성
- */
+/** Creates a child logger bound to a specific request context */
 export function createRequestLogger(options: {
   requestId?: string;
   userId?: string;
@@ -56,7 +55,7 @@ export function createRequestLogger(options: {
 }
 
 /**
- * API Route용 요청 로거 미들웨어 래퍼
+ * Wraps an API handler with request-level logging (start, latency, errors).
  */
 export function withRequestLogging<T>(
   handler: (log: Logger) => Promise<T>,
@@ -65,18 +64,18 @@ export function withRequestLogging<T>(
   const start = Date.now();
   const log = createRequestLogger(context);
 
-  log.debug({ msg: "요청 시작" });
+  log.debug({ msg: "request started" });
 
   return handler(log)
     .then((result) => {
-      log.info({ latencyMs: Date.now() - start, msg: "요청 완료" });
+      log.info({ latencyMs: Date.now() - start, msg: "request completed" });
       return result;
     })
     .catch((err: Error) => {
       log.error({
         latencyMs: Date.now() - start,
         err: { message: err.message, name: err.name },
-        msg: "요청 오류",
+        msg: "request error",
       });
       throw err;
     });

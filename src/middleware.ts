@@ -8,8 +8,8 @@ const SESSION_COOKIE = "__openclaw_session";
 const intlMiddleware = createIntlMiddleware(routing);
 
 /**
- * /login 및 공개 경로 여부 판단 (로케일 접두사 포함).
- * "as-needed" 라우팅이므로 /login, /en/login, /ja/login 모두 허용.
+ * Returns true for public paths that do not require authentication.
+ * Handles locale prefixes (e.g. /login, /en/login, /ja/login).
  */
 function isPublicPath(pathname: string): boolean {
   if (pathname.startsWith("/api/")) return true;
@@ -23,7 +23,7 @@ export async function middleware(request: NextRequest) {
 
   let isAuthenticated = false;
 
-  // ── 1. Supabase 세션 확인 ───────────────────────────────────────
+  // ── 1. Check Supabase session ────────────────────────────────────
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -55,18 +55,19 @@ export async function middleware(request: NextRequest) {
       } = await supabase.auth.getUser();
       if (user) isAuthenticated = true;
     } catch {
-      // Supabase 연결 실패 시 무시
+      // Supabase connection failed — ignore
     }
   }
 
-  // ── 2. env 세션 쿠키 확인 (__openclaw_session 존재 여부만 체크) ──
-  // 서명 검증은 getSessionUser() 가 수행. 여기서는 리다이렉트 여부만 판단.
+  // ── 2. Check env session cookie (existence only) ─────────────────
+  // Signature verification is done later by getSessionUser().
+  // Here we only decide whether to redirect.
   if (!isAuthenticated) {
     const envSession = request.cookies.get(SESSION_COOKIE);
     if (envSession?.value) isAuthenticated = true;
   }
 
-  // ── 3. 인증 수단 없음 → 개발 모드 (인증 우회) ───────────────────
+  // ── 3. No auth configured → dev bypass (allow all) ───────────────
   const hasAnyAuth =
     (supabaseUrl && supabaseAnonKey) ||
     process.env.AUTH_USERS ||
@@ -76,14 +77,14 @@ export async function middleware(request: NextRequest) {
     isAuthenticated = true;
   }
 
-  // ── 4. 보호 경로 미인증 시 /login 리다이렉트 ─────────────────────
+  // ── 4. Redirect unauthenticated requests to /login ───────────────
   if (!isAuthenticated && !isPublicPath(pathname)) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // ── 5. i18n 미들웨어 실행 + Supabase 쿠키 병합 ──────────────────
+  // ── 5. Run i18n middleware and merge Supabase cookies ────────────
   const intlResponse = intlMiddleware(request);
   supabaseResponse.cookies.getAll().forEach((cookie) => {
     intlResponse.cookies.set(cookie.name, cookie.value, {
@@ -98,6 +99,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // api, _next, _vercel, 파일 확장자 → next-intl 이 API 라우트를 잡지 않도록 제외
+  // Exclude api, _next, _vercel, and static files so next-intl does not intercept them
   matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"],
 };

@@ -1,8 +1,6 @@
 import type { Agent, AgentCreateInput, AgentUpdateInput } from "@/types/agent";
 
-/**
- * 에이전트 인메모리 저장소 (SQLITE_PATH 미설정 시 사용)
- */
+/** In-memory agent store (used when AGENT_STORE_PATH is not set) */
 
 function generateId(): string {
   return `agt_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 9)}`;

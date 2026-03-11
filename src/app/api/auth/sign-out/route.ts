@@ -4,20 +4,20 @@ import { SESSION_COOKIE } from "@/lib/auth/env-auth";
 
 /**
  * POST /api/auth/sign-out
- * Supabase 세션 종료 + env 세션 쿠키 삭제
+ * Terminates the Supabase session and clears the env-auth session cookie.
  */
 export async function POST() {
   const res = NextResponse.json({ ok: true });
 
-  // Supabase 로그아웃
+  // Sign out from Supabase
   try {
     const supabase = await createClient();
     await supabase.auth.signOut();
   } catch {
-    // Supabase 미설정 시 무시
+    // Supabase not configured — ignore
   }
 
-  // env 세션 쿠키 삭제
+  // Clear env-auth session cookie
   res.cookies.set(SESSION_COOKIE, "", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

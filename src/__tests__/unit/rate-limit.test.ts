@@ -6,13 +6,13 @@ describe("checkRateLimit", () => {
     vi.useFakeTimers();
   });
 
-  it("첫 요청은 항상 허용", () => {
+  it("allows the first request", () => {
     const result = checkRateLimit("test-key-1", 5, 60_000);
     expect(result.allowed).toBe(true);
     expect(result.remaining).toBe(4);
   });
 
-  it("limit 이하의 요청 모두 허용", () => {
+  it("allows requests up to the limit", () => {
     const key = "test-key-2";
     for (let i = 0; i < 5; i++) {
       const result = checkRateLimit(key, 5, 60_000);
@@ -20,7 +20,7 @@ describe("checkRateLimit", () => {
     }
   });
 
-  it("limit 초과 시 요청 거부", () => {
+  it("blocks requests over the limit", () => {
     const key = "test-key-3";
     for (let i = 0; i < 5; i++) {
       checkRateLimit(key, 5, 60_000);
@@ -30,45 +30,42 @@ describe("checkRateLimit", () => {
     expect(result.remaining).toBe(0);
   });
 
-  it("윈도우 만료 후 카운트 리셋", () => {
+  it("resets the counter after the window expires", () => {
     const key = "test-key-4";
     for (let i = 0; i < 5; i++) {
       checkRateLimit(key, 5, 60_000);
     }
-    // 거부 확인
     expect(checkRateLimit(key, 5, 60_000).allowed).toBe(false);
 
-    // 윈도우 시간 경과
     vi.advanceTimersByTime(61_000);
 
-    // 리셋 후 다시 허용
     const result = checkRateLimit(key, 5, 60_000);
     expect(result.allowed).toBe(true);
     expect(result.remaining).toBe(4);
   });
 
-  it("서로 다른 키는 독립적으로 동작", () => {
+  it("tracks different keys independently", () => {
     for (let i = 0; i < 5; i++) {
       checkRateLimit("key-a", 5, 60_000);
     }
-    // key-a 는 소진됐지만 key-b 는 독립적
+    // key-a is exhausted, key-b is independent
     const result = checkRateLimit("key-b", 5, 60_000);
     expect(result.allowed).toBe(true);
   });
 });
 
 describe("getClientIp", () => {
-  it("x-forwarded-for 헤더에서 첫 번째 IP 추출", () => {
+  it("extracts the first IP from x-forwarded-for", () => {
     const headers = new Headers({ "x-forwarded-for": "1.2.3.4, 5.6.7.8" });
     expect(getClientIp(headers)).toBe("1.2.3.4");
   });
 
-  it("x-real-ip 헤더 폴백", () => {
+  it("falls back to x-real-ip", () => {
     const headers = new Headers({ "x-real-ip": "9.10.11.12" });
     expect(getClientIp(headers)).toBe("9.10.11.12");
   });
 
-  it("IP 헤더 없으면 unknown 반환", () => {
+  it("returns unknown when no IP header is present", () => {
     const headers = new Headers();
     expect(getClientIp(headers)).toBe("unknown");
   });

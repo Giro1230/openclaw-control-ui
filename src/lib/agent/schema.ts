@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-/** AgentConfig Zod 스키마 (폼/API 검증용) */
+/** Zod schema for AgentConfig (form and API validation) */
 export const agentConfigSchema = z.object({
   system_prompt: z.string().max(10000).optional(),
   model: z.string().max(128).optional(),
@@ -9,15 +9,15 @@ export const agentConfigSchema = z.object({
   tools: z.array(z.string()).optional(),
 }).strict();
 
-/** 에이전트 생성 스키마 */
+/** Schema for agent creation requests */
 export const agentCreateSchema = z.object({
-  name: z.string().min(1, "이름 필수").max(128),
-  slug: z.string().min(1).max(64).regex(/^[a-z0-9_-]+$/, "slug: 영소문자, 숫자, -, _ 만").optional(),
+  name: z.string().min(1, "name is required").max(128),
+  slug: z.string().min(1).max(64).regex(/^[a-z0-9_-]+$/, "slug: lowercase letters, digits, hyphens and underscores only").optional(),
   kind: z.enum(["assistant", "tool", "custom"]),
   config: agentConfigSchema.optional(),
 });
 
-/** 에이전트 수정 스키마 */
+/** Schema for agent update requests */
 export const agentUpdateSchema = z.object({
   name: z.string().min(1).max(128).optional(),
   slug: z.string().min(1).max(64).regex(/^[a-z0-9_-]+$/).optional(),

@@ -4,8 +4,8 @@ const START_TIME = Date.now();
 
 /**
  * GET /api/health/live
- * Liveness probe: 프로세스가 살아있는지 확인
- * 쿠버네티스/Docker 헬스체크용, 인증 불필요
+ * Liveness probe: confirms the process is alive.
+ * No authentication required (used by load balancers and orchestrators).
  */
 export async function GET() {
   return NextResponse.json(

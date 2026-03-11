@@ -4,8 +4,8 @@ import { getSessionUser } from "@/lib/auth/session";
 
 /**
  * POST /api/openclaw/chat
- * body: { message: string; agent_id: string; session_id?: string }
- * → Gateway에 채팅 메시지 릴레이 (토큰은 서버에서만 사용)
+ * Body: { message: string; agent_id: string; session_id?: string }
+ * Relays the chat message to the Gateway (token never exposed to the client).
  */
 export async function POST(request: Request) {
   const user = await getSessionUser();
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
   if (!message || !agent_id) {
     return NextResponse.json(
-      { error: "message와 agent_id는 필수입니다." },
+      { error: "message and agent_id are required" },
       { status: 400 }
     );
   }

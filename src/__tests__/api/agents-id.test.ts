@@ -42,17 +42,17 @@ function makeParams(id: string) {
 }
 
 function makeRequest(body?: unknown, method = "GET"): Request {
-  return new Request(`http://localhost/api/agents/agt_test_123`, {
+  return new Request("http://localhost/api/agents/agt_test_123", {
     method,
     headers: { "Content-Type": "application/json" },
     body: body ? JSON.stringify(body) : undefined,
   });
 }
 
-describe("GET /api/agents/[id]", () => {
+describe("GET /api/agents/:id", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("존재하는 에이전트 조회 (200)", async () => {
+  it("returns agent with 200", async () => {
     vi.mocked(getAgentById).mockReturnValue(mockAgent);
     const res = await GET(makeRequest(), makeParams("agt_test_123"));
     expect(res.status).toBe(200);
@@ -60,20 +60,20 @@ describe("GET /api/agents/[id]", () => {
     expect(json.id).toBe("agt_test_123");
   });
 
-  it("존재하지 않는 에이전트 (404)", async () => {
+  it("returns 404 for unknown id", async () => {
     vi.mocked(getAgentById).mockReturnValue(undefined);
     const res = await GET(makeRequest(), makeParams("non-existent"));
     expect(res.status).toBe(404);
   });
 
-  it("다른 owner의 에이전트 조회 시 404 (정보 노출 방지)", async () => {
+  it("returns 404 for another owner's agent (no info leak)", async () => {
     const otherAgent = { ...mockAgent, owner_id: "other-owner" };
     vi.mocked(getAgentById).mockReturnValue(otherAgent);
     const res = await GET(makeRequest(), makeParams("agt_test_123"));
     expect(res.status).toBe(404);
   });
 
-  it("viewer 역할도 조회 가능", async () => {
+  it("allows viewer role to fetch", async () => {
     vi.mocked(getAppRole).mockResolvedValueOnce("viewer");
     vi.mocked(getAgentById).mockReturnValue(mockAgent);
     const res = await GET(makeRequest(), makeParams("agt_test_123"));
@@ -81,13 +81,13 @@ describe("GET /api/agents/[id]", () => {
   });
 });
 
-describe("PATCH /api/agents/[id]", () => {
+describe("PATCH /api/agents/:id", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(getAppRole).mockResolvedValue("operator");
   });
 
-  it("정상 업데이트 (200)", async () => {
+  it("updates agent with 200", async () => {
     const updated = { ...mockAgent, name: "Updated Name" };
     vi.mocked(updateAgent).mockReturnValue(updated);
     const req = makeRequest({ name: "Updated Name" }, "PATCH");
@@ -97,14 +97,14 @@ describe("PATCH /api/agents/[id]", () => {
     expect(json.name).toBe("Updated Name");
   });
 
-  it("존재하지 않는 에이전트 (404)", async () => {
+  it("returns 404 for unknown agent", async () => {
     vi.mocked(updateAgent).mockReturnValue(null);
     const req = makeRequest({ name: "Updated" }, "PATCH");
     const res = await PATCH(req, makeParams("non-existent"));
     expect(res.status).toBe(404);
   });
 
-  it("slug 충돌 시 409", async () => {
+  it("returns 409 for slug conflict", async () => {
     vi.mocked(updateAgent).mockImplementation(() => {
       throw new Error("SLUG_EXISTS");
     });
@@ -113,14 +113,14 @@ describe("PATCH /api/agents/[id]", () => {
     expect(res.status).toBe(409);
   });
 
-  it("viewer 역할은 수정 불가 (403)", async () => {
+  it("returns 403 for viewer role", async () => {
     vi.mocked(getAppRole).mockResolvedValueOnce("viewer");
     const req = makeRequest({ name: "Updated" }, "PATCH");
     const res = await PATCH(req, makeParams("agt_test_123"));
     expect(res.status).toBe(403);
   });
 
-  it("잘못된 JSON (400)", async () => {
+  it("returns 400 for invalid JSON", async () => {
     const req = new Request("http://localhost/api/agents/agt_test_123", {
       method: "PATCH",
       body: "{broken-json}",
@@ -131,13 +131,13 @@ describe("PATCH /api/agents/[id]", () => {
   });
 });
 
-describe("DELETE /api/agents/[id]", () => {
+describe("DELETE /api/agents/:id", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(getAppRole).mockResolvedValue("operator");
   });
 
-  it("정상 삭제 (200)", async () => {
+  it("deletes agent with 200", async () => {
     vi.mocked(deleteAgent).mockReturnValue(true);
     const res = await DELETE(makeRequest(undefined, "DELETE"), makeParams("agt_test_123"));
     expect(res.status).toBe(200);
@@ -145,13 +145,13 @@ describe("DELETE /api/agents/[id]", () => {
     expect(json.success).toBe(true);
   });
 
-  it("존재하지 않는 에이전트 삭제 (404)", async () => {
+  it("returns 404 for unknown agent", async () => {
     vi.mocked(deleteAgent).mockReturnValue(false);
     const res = await DELETE(makeRequest(undefined, "DELETE"), makeParams("non-existent"));
     expect(res.status).toBe(404);
   });
 
-  it("viewer 역할은 삭제 불가 (403)", async () => {
+  it("returns 403 for viewer role", async () => {
     vi.mocked(getAppRole).mockResolvedValueOnce("viewer");
     const res = await DELETE(makeRequest(undefined, "DELETE"), makeParams("agt_test_123"));
     expect(res.status).toBe(403);

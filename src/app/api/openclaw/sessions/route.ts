@@ -4,7 +4,7 @@ import { getSessionUser } from "@/lib/auth/session";
 
 /**
  * GET /api/openclaw/sessions
- * → Gateway에서 세션 목록 릴레이 (viewer 이상)
+ * Relays the session list from the Gateway (viewer role or above).
  */
 export async function GET() {
   const user = await getSessionUser();

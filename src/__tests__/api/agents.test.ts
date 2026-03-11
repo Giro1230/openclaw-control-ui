@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { Agent } from "@/types/agent";
 
-// store Mock - 정적 import 전에 모킹 선언
 vi.mock("@/lib/agent/store", () => ({
   listAgents: vi.fn(),
   createAgent: vi.fn(),
@@ -22,7 +21,6 @@ vi.mock("next/headers", () => ({
   ),
 }));
 
-// 모킹 후 route import
 const { GET, POST } = await import("@/app/api/agents/route");
 const { listAgents, createAgent } = await import("@/lib/agent/store");
 const { getAppRole } = await import("@/lib/auth/get-role");
@@ -51,30 +49,27 @@ describe("GET /api/agents", () => {
     vi.clearAllMocks();
   });
 
-  it("에이전트 목록 반환 (200)", async () => {
+  it("returns agent list with 200", async () => {
     vi.mocked(listAgents).mockReturnValue([mockAgent]);
-    const req = makeRequest();
-    const res = await GET(req);
+    const res = await GET(makeRequest());
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.agents).toHaveLength(1);
     expect(json.agents[0].id).toBe("agt_test_123");
   });
 
-  it("빈 목록 반환 (200)", async () => {
+  it("returns empty list with 200", async () => {
     vi.mocked(listAgents).mockReturnValue([]);
-    const req = makeRequest();
-    const res = await GET(req);
+    const res = await GET(makeRequest());
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.agents).toHaveLength(0);
   });
 
-  it("viewer 역할도 목록 조회 가능", async () => {
+  it("allows viewer role to list agents", async () => {
     vi.mocked(getAppRole).mockResolvedValueOnce("viewer");
     vi.mocked(listAgents).mockReturnValue([mockAgent]);
-    const req = makeRequest();
-    const res = await GET(req);
+    const res = await GET(makeRequest());
     expect(res.status).toBe(200);
   });
 });
@@ -85,7 +80,7 @@ describe("POST /api/agents", () => {
     vi.mocked(getAppRole).mockResolvedValue("operator");
   });
 
-  it("유효한 입력으로 에이전트 생성 (201)", async () => {
+  it("creates an agent with valid input (201)", async () => {
     vi.mocked(createAgent).mockReturnValue(mockAgent);
     const req = makeRequest({ name: "Test Agent", kind: "assistant" }, "POST");
     const res = await POST(req);
@@ -94,7 +89,7 @@ describe("POST /api/agents", () => {
     expect(json.id).toBe("agt_test_123");
   });
 
-  it("잘못된 JSON 시 400 반환", async () => {
+  it("returns 400 for invalid JSON", async () => {
     const req = new Request("http://localhost/api/agents", {
       method: "POST",
       body: "not-json",
@@ -106,7 +101,7 @@ describe("POST /api/agents", () => {
     expect(json.error).toBe("invalid_json");
   });
 
-  it("name 누락 시 400 반환 (validation)", async () => {
+  it("returns 400 for missing name (validation)", async () => {
     const req = makeRequest({ kind: "assistant" }, "POST");
     const res = await POST(req);
     expect(res.status).toBe(400);
@@ -114,13 +109,13 @@ describe("POST /api/agents", () => {
     expect(json.error).toBe("validation");
   });
 
-  it("유효하지 않은 kind 시 400 반환", async () => {
+  it("returns 400 for invalid kind", async () => {
     const req = makeRequest({ name: "Test", kind: "invalid-kind" }, "POST");
     const res = await POST(req);
     expect(res.status).toBe(400);
   });
 
-  it("slug 중복 시 409 반환", async () => {
+  it("returns 409 for duplicate slug", async () => {
     vi.mocked(createAgent).mockImplementation(() => {
       throw new Error("SLUG_EXISTS");
     });
@@ -131,7 +126,7 @@ describe("POST /api/agents", () => {
     expect(json.error).toBe("slug_exists");
   });
 
-  it("viewer 역할은 생성 불가 (403)", async () => {
+  it("returns 403 for viewer role", async () => {
     vi.mocked(getAppRole).mockResolvedValueOnce("viewer");
     const req = makeRequest({ name: "Test", kind: "assistant" }, "POST");
     const res = await POST(req);

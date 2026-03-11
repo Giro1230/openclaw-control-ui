@@ -3,7 +3,9 @@ import * as file from "./store-file";
 import * as memory from "./store-memory";
 
 /**
- * 에이전트 저장소: AGENT_STORE_PATH(또는 SQLITE_PATH) 설정 시 JSON 파일, 없으면 인메모리
+ * Agent store facade.
+ * Routes to the JSON file store when AGENT_STORE_PATH (or SQLITE_PATH) is set;
+ * otherwise uses the in-memory store.
  */
 function isFileStoreEnabled(): boolean {
   const p = process.env.AGENT_STORE_PATH ?? process.env.SQLITE_PATH;

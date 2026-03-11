@@ -41,7 +41,7 @@ const mockUser = {
 describe("GET /api/openclaw/sessions", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("인증된 사용자 - 세션 목록 반환 (200)", async () => {
+  it("returns session list for authenticated user (200)", async () => {
     vi.mocked(getSessionUser).mockResolvedValue(mockUser as never);
     vi.mocked(listGatewaySessions).mockResolvedValue(mockSessions);
     const res = await sessionsGET();
@@ -50,7 +50,7 @@ describe("GET /api/openclaw/sessions", () => {
     expect(json.sessions).toHaveLength(2);
   });
 
-  it("미인증 사용자 - 401 반환", async () => {
+  it("returns 401 for unauthenticated request", async () => {
     vi.mocked(getSessionUser).mockResolvedValue(null);
     const res = await sessionsGET();
     expect(res.status).toBe(401);
@@ -58,7 +58,7 @@ describe("GET /api/openclaw/sessions", () => {
     expect(json.error).toBe("unauthenticated");
   });
 
-  it("Gateway 타임아웃 - 504 반환", async () => {
+  it("returns 504 on Gateway timeout", async () => {
     vi.mocked(getSessionUser).mockResolvedValue(mockUser as never);
     vi.mocked(listGatewaySessions).mockRejectedValue(new Error("OPENCLAW_GATEWAY_TIMEOUT"));
     const res = await sessionsGET();
@@ -67,7 +67,7 @@ describe("GET /api/openclaw/sessions", () => {
     expect(json.error).toBe("gateway_timeout");
   });
 
-  it("Gateway URL 미설정 - 빈 배열 반환 (200)", async () => {
+  it("returns empty array when Gateway is not configured (200)", async () => {
     vi.mocked(getSessionUser).mockResolvedValue(mockUser as never);
     vi.mocked(listGatewaySessions).mockRejectedValue(new Error("OPENCLAW_GATEWAY_URL not set"));
     const res = await sessionsGET();
@@ -81,7 +81,7 @@ describe("GET /api/openclaw/sessions", () => {
 describe("GET /api/openclaw/status", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("인증된 사용자 - Gateway 상태 반환 (200)", async () => {
+  it("returns Gateway status for authenticated user (200)", async () => {
     vi.mocked(getSessionUser).mockResolvedValue(mockUser as never);
     vi.mocked(fetchGatewayStatus).mockResolvedValue({ version: "1.0.0", uptime: 3600 });
     const res = await statusGET();
@@ -91,7 +91,7 @@ describe("GET /api/openclaw/status", () => {
     expect(json.status).toBeDefined();
   });
 
-  it("미인증 사용자 - 401 반환 (보안 강화됨)", async () => {
+  it("returns 401 for unauthenticated request (security fix)", async () => {
     vi.mocked(getSessionUser).mockResolvedValue(null);
     const res = await statusGET();
     expect(res.status).toBe(401);
@@ -99,7 +99,7 @@ describe("GET /api/openclaw/status", () => {
     expect(json.error).toBe("unauthorized");
   });
 
-  it("Gateway 타임아웃 - 504 반환", async () => {
+  it("returns 504 on Gateway timeout", async () => {
     vi.mocked(getSessionUser).mockResolvedValue(mockUser as never);
     vi.mocked(fetchGatewayStatus).mockRejectedValue(new Error("OPENCLAW_GATEWAY_TIMEOUT"));
     const res = await statusGET();
@@ -108,7 +108,7 @@ describe("GET /api/openclaw/status", () => {
     expect(json.ok).toBe(false);
   });
 
-  it("Gateway 연결 실패 - 502 반환", async () => {
+  it("returns 502 on Gateway connection failure", async () => {
     vi.mocked(getSessionUser).mockResolvedValue(mockUser as never);
     vi.mocked(fetchGatewayStatus).mockRejectedValue(new Error("ECONNREFUSED"));
     const res = await statusGET();

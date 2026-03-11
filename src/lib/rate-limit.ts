@@ -1,6 +1,7 @@
 /**
- * 인메모리 슬라이딩 윈도우 rate limiter.
- * 단일 인스턴스 환경 적합. 멀티 인스턴스/엣지 환경은 Redis(Upstash) 사용 권장.
+ * In-memory sliding window rate limiter.
+ * Suitable for single-instance deployments.
+ * For multi-instance or edge environments, use a Redis-backed solution (e.g. Upstash).
  */
 
 interface RateLimitEntry {
@@ -12,7 +13,7 @@ const store = new Map<string, RateLimitEntry>();
 
 const CLEANUP_INTERVAL_MS = 60_000;
 
-// 만료된 항목 주기적 정리 (메모리 누수 방지)
+// Periodically remove expired entries to prevent memory leaks
 if (typeof setInterval !== "undefined") {
   setInterval(() => {
     const now = Date.now();
@@ -29,10 +30,10 @@ export interface RateLimitResult {
 }
 
 /**
- * IP/식별자 기반 rate limit 체크
- * @param key - IP 주소 또는 사용자 식별자
- * @param limit - 허용 횟수
- * @param windowMs - 윈도우 크기 (밀리초)
+ * Checks the rate limit for a given key.
+ * @param key - IP address or user identifier
+ * @param limit - Maximum number of requests allowed in the window
+ * @param windowMs - Window size in milliseconds
  */
 export function checkRateLimit(
   key: string,
@@ -60,9 +61,7 @@ export function checkRateLimit(
   };
 }
 
-/**
- * NextRequest에서 클라이언트 IP 추출
- */
+/** Extracts the client IP from request headers */
 export function getClientIp(headers: Headers): string {
   return (
     headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??

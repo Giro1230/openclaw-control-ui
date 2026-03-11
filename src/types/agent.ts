@@ -1,26 +1,26 @@
 /**
- * 에이전트 도메인 타입
- * OpenClaw Gateway와 연동되는 에이전트 설정/메타데이터.
+ * Agent domain types.
+ * Represents agent configuration and metadata for the OpenClaw Gateway.
  */
 
-/** 에이전트 런타임 타입 (gateway에서 인식하는 종류) */
+/** Agent runtime kind (recognized by the Gateway) */
 export type AgentKind = "assistant" | "tool" | "custom";
 
-/** DB/API용 에이전트 레코드 */
+/** Agent record stored in the database or file store */
 export interface Agent {
   id: string;
   name: string;
   slug: string;
   kind: AgentKind;
-  /** 시스템/사용자 프롬프트 등 설정 JSON */
+  /** Configuration JSON (system prompt, model settings, etc.) */
   config: AgentConfig;
-  /** 소유자(팀/유저) 식별. RLS에서 사용 */
+  /** Owner identifier (team or user). Used for RLS filtering. */
   owner_id: string;
   created_at: string;
   updated_at: string;
 }
 
-/** 에이전트 설정 본문 (확장 가능) */
+/** Agent configuration body (extensible) */
 export interface AgentConfig {
   system_prompt?: string;
   model?: string;
@@ -30,7 +30,7 @@ export interface AgentConfig {
   [key: string]: unknown;
 }
 
-/** 목록 조회 시 사용하는 경량 타입 */
+/** Lightweight type used for list responses */
 export interface AgentSummary {
   id: string;
   name: string;
@@ -39,7 +39,7 @@ export interface AgentSummary {
   updated_at: string;
 }
 
-/** 생성/수정 요청 바디 */
+/** Request body for creating an agent */
 export interface AgentCreateInput {
   name: string;
   slug?: string;
@@ -47,6 +47,7 @@ export interface AgentCreateInput {
   config?: AgentConfig;
 }
 
+/** Request body for updating an agent */
 export interface AgentUpdateInput {
   name?: string;
   slug?: string;

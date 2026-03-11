@@ -4,13 +4,13 @@ import { randomUUID } from "crypto";
 import type { Agent, AgentCreateInput, AgentUpdateInput } from "@/types/agent";
 
 /**
- * 에이전트 JSON 파일 저장소 (AGENT_STORE_PATH 설정 시 사용)
+ * JSON file-based agent store (used when AGENT_STORE_PATH is set).
  *
- * 동시성 안전성:
- * - atomic write: 임시 파일에 먼저 쓴 후 rename으로 원자적 교체
- * - 단일 Node.js 프로세스 내 동시성: rename은 단일 프로세스 내에서 순차적으로 처리됨
- * - 멀티 프로세스/Pod 환경: 파일락(proper-lockfile 등) 또는 DB 마이그레이션 필요
- *   → MIGRATION.md의 파일→DB 전환 가이드 참조
+ * Concurrency safety:
+ * - Atomic write: writes to a temp file first, then renames (OS-level atomic replace).
+ * - Safe within a single Node.js process (rename is serialized by the event loop).
+ * - For multi-process or multi-pod deployments, use a database instead.
+ *   See ARCHITECTURE.md for the file→DB migration guide.
  */
 
 function generateId(): string {
@@ -55,8 +55,8 @@ function loadAll(): Agent[] {
 }
 
 /**
- * 원자적 파일 쓰기: 임시 파일에 먼저 작성 후 rename으로 교체
- * 쓰기 도중 프로세스가 죽어도 기존 파일 손상 없음
+ * Atomic file write: writes to a temp file then renames to replace the target.
+ * Prevents data corruption if the process crashes mid-write.
  */
 function saveAll(agents: Agent[]): void {
   const filePath = getPath();
@@ -68,14 +68,14 @@ function saveAll(agents: Agent[]): void {
       encoding: "utf-8",
       flag: "w",
     });
-    // atomic rename: 같은 파일시스템 내에서 원자적 교체
+    // Atomic replace on the same filesystem
     fs.renameSync(tmpPath, filePath);
   } catch (err) {
-    // 임시 파일 정리
+    // Clean up temp file on failure
     try {
       fs.unlinkSync(tmpPath);
     } catch {
-      // 무시
+      // Ignore cleanup errors
     }
     throw err;
   }

@@ -3,8 +3,9 @@ import { fetchGatewayStatus } from "@/lib/openclaw/gateway-client";
 import { getSessionUser } from "@/lib/auth/session";
 
 /**
- * GET: OpenClaw Gateway 상태 (인증 필수)
- * 서버에서만 Gateway 호출하여 토큰 노출 방지
+ * GET /api/openclaw/status
+ * Returns Gateway connectivity status. Authentication required.
+ * The Gateway token is used server-side only and never exposed to the client.
  */
 export async function GET() {
   const user = await getSessionUser();

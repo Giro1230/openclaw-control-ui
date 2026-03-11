@@ -1,13 +1,13 @@
 /**
- * RBAC: 앱 내 역할 (viewer / operator / admin)
- * 게이트웨이 토큰과 분리된 앱 레벨 권한.
+ * RBAC: application-level roles (viewer / operator / admin).
+ * Separate from Gateway tokens — controls what the user can do in the dashboard.
  */
 export type AppRole = "viewer" | "operator" | "admin";
 
 /**
- * 역할이 최소 권한 이상인지 검사
- * @param userRole - 사용자 역할
- * @param required - 필요 최소 역할 (viewer < operator < admin)
+ * Returns true if the user's role meets or exceeds the required minimum.
+ * @param userRole - The user's current role
+ * @param required - Minimum required role (viewer < operator < admin)
  */
 export function hasRole(userRole: AppRole, required: AppRole): boolean {
   const order: Record<AppRole, number> = {
@@ -18,12 +18,8 @@ export function hasRole(userRole: AppRole, required: AppRole): boolean {
   return order[userRole] >= order[required];
 }
 
-/**
- * 에이전트 수정/삭제는 operator 이상
- */
+/** Minimum role required to create, edit, or delete agents */
 export const AGENT_WRITE_MIN_ROLE: AppRole = "operator";
 
-/**
- * 에이전트 목록/조회는 viewer 이상
- */
+/** Minimum role required to list or view agents */
 export const AGENT_READ_MIN_ROLE: AppRole = "viewer";

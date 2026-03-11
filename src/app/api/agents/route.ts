@@ -4,14 +4,12 @@ import { getAppRole, getOwnerId } from "@/lib/auth/get-role";
 import { listAgents, createAgent } from "@/lib/agent/store";
 import { agentCreateSchema } from "@/lib/agent/schema";
 
-/**
- * GET: 에이전트 목록 조회 (viewer 이상)
- */
+/** GET /api/agents — List agents (viewer role or above) */
 export async function GET(request: Request) {
   const role = await getAppRole(request.headers);
   if (!hasRole(role, AGENT_READ_MIN_ROLE)) {
     return NextResponse.json(
-      { error: "forbidden", message: "역할 권한 부족" },
+      { error: "forbidden", message: "Insufficient role" },
       { status: 403 }
     );
   }
@@ -20,14 +18,12 @@ export async function GET(request: Request) {
   return NextResponse.json({ agents: list });
 }
 
-/**
- * POST: 에이전트 생성 (operator 이상)
- */
+/** POST /api/agents — Create an agent (operator role or above) */
 export async function POST(request: Request) {
   const role = await getAppRole(request.headers);
   if (!hasRole(role, AGENT_WRITE_MIN_ROLE)) {
     return NextResponse.json(
-      { error: "forbidden", message: "역할 권한 부족" },
+      { error: "forbidden", message: "Insufficient role" },
       { status: 403 }
     );
   }

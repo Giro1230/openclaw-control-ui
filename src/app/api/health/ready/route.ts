@@ -11,14 +11,14 @@ interface HealthCheck {
 
 /**
  * GET /api/health/ready
- * Readiness probe: 의존 서비스(Gateway, Supabase) 준비 상태 확인
- * 인증 불필요 (로드밸런서/오케스트레이터에서 호출)
+ * Readiness probe: checks whether dependent services (Gateway, Supabase) are reachable.
+ * No authentication required (used by load balancers and orchestrators).
  */
 export async function GET() {
   const checks: HealthCheck[] = [];
   let overallStatus: HealthStatus = "ok";
 
-  // ── Gateway 연결 확인 ──────────────────────────────────────────────
+  // ── Gateway connectivity check ────────────────────────────────────
   const gatewayUrl = process.env.OPENCLAW_GATEWAY_URL;
   if (gatewayUrl) {
     const start = Date.now();
@@ -41,15 +41,15 @@ export async function GET() {
         name: "gateway",
         status: "degraded",
         latencyMs: Date.now() - start,
-        detail: "연결 불가",
+        detail: "unreachable",
       });
       overallStatus = "degraded";
     }
   } else {
-    checks.push({ name: "gateway", status: "ok", detail: "미설정 (선택사항)" });
+    checks.push({ name: "gateway", status: "ok", detail: "not configured (optional)" });
   }
 
-  // ── Supabase 연결 확인 ────────────────────────────────────────────
+  // ── Supabase connectivity check ───────────────────────────────────
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   if (supabaseUrl) {
     const start = Date.now();
@@ -70,12 +70,12 @@ export async function GET() {
         name: "supabase",
         status: "degraded",
         latencyMs: Date.now() - start,
-        detail: "연결 불가",
+        detail: "unreachable",
       });
       overallStatus = "degraded";
     }
   } else {
-    checks.push({ name: "supabase", status: "ok", detail: "미설정 (env-auth 사용 중)" });
+    checks.push({ name: "supabase", status: "ok", detail: "not configured (using env-auth)" });
   }
 
   const httpStatus = (overallStatus as string) === "error" ? 503 : 200;

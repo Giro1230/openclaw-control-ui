@@ -6,7 +6,7 @@ import {
 } from "@/lib/agent/schema";
 
 describe("agentConfigSchema", () => {
-  it("유효한 설정 파싱 성공", () => {
+  it("accepts valid config", () => {
     const result = agentConfigSchema.safeParse({
       system_prompt: "You are a helpful assistant.",
       model: "gpt-4",
@@ -17,35 +17,35 @@ describe("agentConfigSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("빈 객체도 유효 (모든 필드 optional)", () => {
+  it("accepts empty object (all fields optional)", () => {
     expect(agentConfigSchema.safeParse({}).success).toBe(true);
   });
 
-  it("temperature 범위 초과 시 실패", () => {
+  it("rejects temperature out of range", () => {
     const result = agentConfigSchema.safeParse({ temperature: 3.0 });
     expect(result.success).toBe(false);
   });
 
-  it("max_tokens 최소값 미만 시 실패", () => {
+  it("rejects max_tokens below minimum", () => {
     const result = agentConfigSchema.safeParse({ max_tokens: 0 });
     expect(result.success).toBe(false);
   });
 
-  it("system_prompt 10000자 초과 시 실패", () => {
+  it("rejects system_prompt over 10000 characters", () => {
     const result = agentConfigSchema.safeParse({
       system_prompt: "a".repeat(10001),
     });
     expect(result.success).toBe(false);
   });
 
-  it("미지의 키 포함 시 strict 모드로 실패", () => {
+  it("rejects unknown keys (strict mode)", () => {
     const result = agentConfigSchema.safeParse({ unknown_field: "value" });
     expect(result.success).toBe(false);
   });
 });
 
 describe("agentCreateSchema", () => {
-  it("유효한 에이전트 생성 입력 파싱 성공", () => {
+  it("accepts valid create input", () => {
     const result = agentCreateSchema.safeParse({
       name: "My Agent",
       kind: "assistant",
@@ -57,17 +57,17 @@ describe("agentCreateSchema", () => {
     }
   });
 
-  it("name 누락 시 실패", () => {
+  it("rejects missing name", () => {
     const result = agentCreateSchema.safeParse({ kind: "assistant" });
     expect(result.success).toBe(false);
   });
 
-  it("빈 name 시 실패", () => {
+  it("rejects empty name", () => {
     const result = agentCreateSchema.safeParse({ name: "", kind: "assistant" });
     expect(result.success).toBe(false);
   });
 
-  it("유효하지 않은 kind 값 실패", () => {
+  it("rejects invalid kind", () => {
     const result = agentCreateSchema.safeParse({
       name: "Test",
       kind: "invalid",
@@ -75,7 +75,7 @@ describe("agentCreateSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("slug 형식 검증 - 올바른 slug", () => {
+  it("accepts valid slug format", () => {
     const result = agentCreateSchema.safeParse({
       name: "Test",
       kind: "tool",
@@ -84,7 +84,7 @@ describe("agentCreateSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("slug 형식 검증 - 대문자 포함 실패", () => {
+  it("rejects slug with uppercase letters", () => {
     const result = agentCreateSchema.safeParse({
       name: "Test",
       kind: "tool",
@@ -93,7 +93,7 @@ describe("agentCreateSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("slug 형식 검증 - 특수문자 포함 실패", () => {
+  it("rejects slug with special characters", () => {
     const result = agentCreateSchema.safeParse({
       name: "Test",
       kind: "tool",
@@ -102,7 +102,7 @@ describe("agentCreateSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("name 128자 초과 시 실패", () => {
+  it("rejects name over 128 characters", () => {
     const result = agentCreateSchema.safeParse({
       name: "a".repeat(129),
       kind: "assistant",
@@ -110,7 +110,7 @@ describe("agentCreateSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("config 포함 시 정상 파싱", () => {
+  it("accepts config field", () => {
     const result = agentCreateSchema.safeParse({
       name: "Test Agent",
       kind: "custom",
@@ -121,23 +121,23 @@ describe("agentCreateSchema", () => {
 });
 
 describe("agentUpdateSchema", () => {
-  it("모든 필드 optional - 빈 객체 유효", () => {
+  it("accepts empty object (all fields optional)", () => {
     expect(agentUpdateSchema.safeParse({}).success).toBe(true);
   });
 
-  it("name만 업데이트 가능", () => {
+  it("accepts name-only update", () => {
     const result = agentUpdateSchema.safeParse({ name: "New Name" });
     expect(result.success).toBe(true);
   });
 
-  it("config만 업데이트 가능", () => {
+  it("accepts config-only update", () => {
     const result = agentUpdateSchema.safeParse({
       config: { temperature: 0.5 },
     });
     expect(result.success).toBe(true);
   });
 
-  it("유효하지 않은 kind 값 실패", () => {
+  it("rejects invalid kind", () => {
     const result = agentUpdateSchema.safeParse({ kind: "unknown" });
     expect(result.success).toBe(false);
   });
