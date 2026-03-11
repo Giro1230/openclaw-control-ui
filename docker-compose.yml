@@ -12,12 +12,25 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
+      # ── 인증 (옵션 A: Supabase)
       - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL:-}
       - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}
+      # ── 인증 (옵션 B: env-auth) ← 둘 중 하나만 설정
+      - AUTH_USERS=${AUTH_USERS:-}
+      - AUTH_EMAIL=${AUTH_EMAIL:-}
+      - AUTH_TOKEN=${AUTH_TOKEN:-}
+      - AUTH_ROLE=${AUTH_ROLE:-}
+      - AUTH_SECRET=${AUTH_SECRET:-}
+      # ── Gateway
       - OPENCLAW_GATEWAY_URL=${OPENCLAW_GATEWAY_URL:-ws://openclaw-gateway:18789}
       - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN:-}
+      # ── 저장소 / i18n
       - AGENT_STORE_PATH=${AGENT_STORE_PATH:-/app/data/agents.json}
       - I18N_TIMEZONE=${I18N_TIMEZONE:-Asia/Seoul}
+      # ── 관측성 (선택)
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - NEXT_PUBLIC_SENTRY_DSN=${NEXT_PUBLIC_SENTRY_DSN:-}
+      - SENTRY_DSN=${SENTRY_DSN:-}
     volumes:
       - dashboard_data:/app/data
     profiles:
