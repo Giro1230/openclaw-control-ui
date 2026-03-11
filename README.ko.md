@@ -3,7 +3,7 @@
 > OpenClaw를 올바르게 사용하기 위한 커스텀 제어 UI입니다.  
 > Supabase 앱 인증과 OpenClaw Gateway 토큰을 분리하고, 에이전트·세션·채팅을 한 곳에서 관리합니다.
 
-[![CI](https://github.com/hellowin1230/openclawdashboard/actions/workflows/ci.yml/badge.svg)](https://github.com/hellowin1230/openclawdashboard/actions/workflows/ci.yml)
+[![CI](https://github.com/Giro1230/openclaw-control-ui/actions/workflows/ci.yml/badge.svg)](https://github.com/Giro1230/openclaw-control-ui/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](tsconfig.json)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
 

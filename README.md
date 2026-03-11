@@ -3,7 +3,7 @@
 > A custom control UI for using OpenClaw properly.  
 > Separates Supabase app auth from OpenClaw Gateway tokens, and manages agents, sessions, and chat in one place.
 
-[![CI](https://github.com/hellowin1230/openclawdashboard/actions/workflows/ci.yml/badge.svg)](https://github.com/hellowin1230/openclawdashboard/actions/workflows/ci.yml)
+[![CI](https://github.com/Giro1230/openclaw-control-ui/actions/workflows/ci.yml/badge.svg)](https://github.com/Giro1230/openclaw-control-ui/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](tsconfig.json)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
 

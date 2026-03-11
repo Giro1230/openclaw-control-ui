@@ -1,10 +1,10 @@
 # CODEOWNERS - Required reviewers before PR merge
 
 # Default owner for all files
-* @hellowin1230
+* @Giro1230
 
 # Security-sensitive files - mandatory review
-src/lib/auth/**         @hellowin1230
-src/middleware.ts       @hellowin1230
-.github/workflows/**    @hellowin1230
-SECURITY.md             @hellowin1230
+src/lib/auth/**         @Giro1230
+src/middleware.ts       @Giro1230
+.github/workflows/**    @Giro1230
+SECURITY.md             @Giro1230
