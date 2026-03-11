@@ -5,6 +5,8 @@
 
 [![CI](https://github.com/Giro1230/openclaw-control-ui/actions/workflows/ci.yml/badge.svg)](https://github.com/Giro1230/openclaw-control-ui/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](tsconfig.json)
+[![Tests](https://img.shields.io/badge/tests-80%20passed-brightgreen)](#빌드--테스트)
+[![Coverage](https://img.shields.io/badge/coverage-70%25%2B-green)](#빌드--테스트)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
 
 **다른 언어로 읽기:**
@@ -26,13 +28,23 @@
 
 ## 빌드 · 테스트
 
-| 항목 | 결과 |
+| 항목 | 커맨드 | 결과 |
+|------|--------|------|
+| TypeScript 타입 체크 | `npm run typecheck` | ✅ 오류 없음 |
+| ESLint | `npm run lint` | ✅ 경고·오류 없음 |
+| 단위·API 테스트 | `npm run test` | ✅ 80개 테스트 통과 |
+| 커버리지 기준 | `npm run test:coverage` | ✅ lines/functions ≥ 70%, branches ≥ 60% |
+| 프로덕션 빌드 | `npm run build` | ✅ 정상 생성 |
+| Docker Compose | — | ✅ local / server 프로필 |
+
+### 브랜치 보호 (main)
+
+| 규칙 | 상태 |
 |------|------|
-| TypeScript 타입 체크 (`npm run typecheck`) | ✅ 오류 없음 |
-| ESLint (`npm run lint`) | ✅ 경고·오류 없음 |
-| 단위·API 테스트 (`npm run test`) | ✅ 71개 테스트 통과 |
-| 프로덕션 빌드 (`npm run build`) | ✅ 정상 생성 |
-| Docker Compose | ✅ local / server 프로필 |
+| 필수 통과 체크 | ✅ Quality Gate · Security Scan · Secret Scan |
+| PR 리뷰 필수 | ✅ 최소 1명 승인 필요 |
+| main 직접 push | ✅ 차단됨 |
+| Force push | ✅ 차단됨 |
 
 ### 라우트 목록
 

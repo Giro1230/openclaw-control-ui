@@ -5,6 +5,8 @@
 
 [![CI](https://github.com/Giro1230/openclaw-control-ui/actions/workflows/ci.yml/badge.svg)](https://github.com/Giro1230/openclaw-control-ui/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](tsconfig.json)
+[![Tests](https://img.shields.io/badge/tests-80%20passed-brightgreen)](#build--test)
+[![Coverage](https://img.shields.io/badge/coverage-70%25%2B-green)](#build--test)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
 
 **Read this in other languages:**
@@ -26,13 +28,23 @@
 
 ## Build & Test
 
-| Check | Result |
-|-------|--------|
-| TypeScript (`npm run typecheck`) | ✅ No errors |
-| ESLint (`npm run lint`) | ✅ No warnings or errors |
-| Unit & API tests (`npm run test`) | ✅ 71 tests passing |
-| Production build (`npm run build`) | ✅ All routes built successfully |
-| Docker Compose | ✅ `local` and `server` profiles |
+| Check | Command | Result |
+|-------|---------|--------|
+| TypeScript | `npm run typecheck` | ✅ No errors |
+| ESLint | `npm run lint` | ✅ No warnings or errors |
+| Unit & API tests | `npm run test` | ✅ 80 tests passing |
+| Coverage threshold | `npm run test:coverage` | ✅ lines/functions ≥ 70%, branches ≥ 60% |
+| Production build | `npm run build` | ✅ All routes built successfully |
+| Docker Compose | — | ✅ `local` and `server` profiles |
+
+### Branch Protection (main)
+
+| Rule | Status |
+|------|--------|
+| Required status checks | ✅ Quality Gate · Security Scan · Secret Scan |
+| Required PR reviews | ✅ 1 approval required |
+| Direct push to main | ✅ Blocked |
+| Force push | ✅ Blocked |
 
 ### Routes
 
