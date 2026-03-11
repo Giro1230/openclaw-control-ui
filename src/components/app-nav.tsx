@@ -17,7 +17,6 @@ export function AppNav() {
   const links = [
     { href: "/", label: "Dashboard" },
     { href: "/sessions", label: t("sessions") },
-    { href: "/agents", label: t("agents") },
     { href: "/settings", label: t("settings") },
   ];
 
