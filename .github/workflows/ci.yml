@@ -127,7 +127,7 @@ jobs:
           E2E_AUTH_TOKEN: ${{ secrets.E2E_AUTH_TOKEN || 'test-token' }}
 
       - name: Upload Playwright report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: playwright-report
@@ -135,7 +135,7 @@ jobs:
           retention-days: 7
 
       - name: Upload Playwright traces (failures only)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: playwright-traces
