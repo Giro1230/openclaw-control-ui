@@ -54,7 +54,7 @@
     "@vitest/coverage-v8": "^4.1.0",
     "daisyui": "^4.12.14",
     "eslint": "^9.16.0",
-    "eslint-config-next": "15.1.0",
+    "eslint-config-next": "16.2.1",
     "happy-dom": "^20.8.4",
     "husky": "^9.1.7",
     "msw": "^2.12.11",
